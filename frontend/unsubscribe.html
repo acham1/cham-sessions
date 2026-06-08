@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Unsubscribe — {{NAME}}</title>
+  <link rel="icon" type="image/png" href="favicon.png">
+  <link rel="apple-touch-icon" href="apple-touch-icon.png">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container">
+    <h1><a href="./"><img src="logo-icon.png" alt="" class="header-logo">{{NAME}}</a></h1>
+    <nav>
+      <a href="archive.html">Archive</a>
+      <a href="{{API_URL}}/podcast.xml">Podcast</a>
+      <a href="{{API_URL}}/feed.xml">RSS</a>
+    </nav>
+  </div>
+</header>
+
+<section class="unsub-message">
+  <div class="container">
+    <h2>Unsubscribe</h2>
+    <p id="unsub-result">Processing...</p>
+  </div>
+</section>
+
+<footer class="site-footer">
+  <div class="container">
+    <a href="./">Home</a>
+  </div>
+</footer>
+
+<script>
+  window.CHAM_API_BASE = "{{API_URL}}";
+</script>
+<script src="app.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{NAME}}</title>
+  <link rel="icon" type="image/png" href="favicon.png">
+  <link rel="apple-touch-icon" href="apple-touch-icon.png">
+  <link rel="stylesheet" href="style.css">
+  <link rel="alternate" type="application/rss+xml" title="{{NAME}}" href="{{API_URL}}/feed.xml">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container">
+    <h1><a href="./"><img src="logo-icon.png" alt="" class="header-logo">{{NAME}}</a></h1>
+    <nav>
+      <a href="archive.html">Archive</a>
+      <a href="{{API_URL}}/podcast.xml">Podcast</a>
+      <a href="{{API_URL}}/feed.xml">RSS</a>
+    </nav>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="container">
+    <h2>{{TAGLINE}}</h2>
+    <p>{{DESCRIPTION}}</p>
+
+    <form id="signup-form" class="signup-form">
+      <input type="email" placeholder="you@example.com" required>
+      <button type="submit">Subscribe</button>
+    </form>
+    <p id="signup-message" class="signup-message"></p>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2>Latest Episodes</h2>
+    <div id="latest-preview" class="card-grid">
+      <p>Loading...</p>
+    </div>
+  </div>
+</section>
+
+<footer class="site-footer">
+  <div class="container">
+    <a href="archive.html">Browse all episodes</a> · <a href="{{API_URL}}/podcast.xml">Podcast</a> · <a href="{{API_URL}}/feed.xml">RSS Feed</a>
+  </div>
+</footer>
+
+<script>
+  window.CHAM_API_BASE = "{{API_URL}}";
+</script>
+<script src="app.js"></script>
+
+</body>
+</html>

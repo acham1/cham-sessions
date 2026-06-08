@@ -1,0 +1,15 @@
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+.env
+.venv/
+venv/
+*.log
+.firebase/
+.DS_Store
+node_modules/
+_site/
+.claude/settings.local.json
+# Build-time copies made by deploy.sh (source of truth is the root config.yaml)
+functions/*/config.yaml

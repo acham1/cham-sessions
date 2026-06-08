@@ -1,0 +1,9 @@
+[project]
+name = "cham-sessions"
+version = "0.1.0"
+description = "Forward an article or topic; get a conversational podcast episode in your feed"
+requires-python = ">=3.12"
+
+[tool.black]
+line-length = 88
+target-version = ["py312"]

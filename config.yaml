@@ -1,0 +1,42 @@
+# Branding
+name: "Cham Sessions"
+tagline: "I'm Alan Cham. These are riffs on the things I've been meaning to read."
+description: >-
+  Forward an article, a PDF, a link, or just a topic, and Cham Sessions turns it
+  into a conversational podcast episode you can listen to on a drive.
+
+# GCP infrastructure
+gcp_project: cham-sessions
+gcp_region: us-central1
+secret_name: environment-variables
+topic: cham-sessions-episode-trigger
+
+# Inbound email (Resend Inbound)
+# The address you forward content to. Requires MX records on the inbound domain.
+inbound_address: cham-sessions@mail.alanch.am
+# Only emails from these senders are processed. Everything else is dropped.
+# Configured via the ALLOWED_SENDERS secret (comma-separated) to keep personal
+# addresses out of this public repo; this list is a local-dev fallback only.
+allowed_senders: []
+
+# URLs & email (outbound via Resend)
+site_url: https://cham-sessions.alanch.am
+from_email: no-reply@mail.alanch.am
+
+# Storage
+# Original forwarded attachments (PDFs, etc.) are stashed here; episodes/ holds audio.
+podcast_bucket: cham-sessions
+
+# Podcast metadata
+podcast_cover_url: https://storage.googleapis.com/cham-sessions/cover.png
+podcast_category: Technology
+podcast_description: >-
+  A personal listen-later feed. Forward an article, paper, PDF, or topic and an
+  AI turns it into a two- or three-voice conversation — Socratic walkthroughs,
+  panels, and debates — that clearly cites its source. Built for self-education
+  on long drives.
+
+# Generation guardrails
+# Per-episode ceiling for the research/script agent.
+max_budget_usd: 0.75
+claude_model: claude-sonnet-4-6
