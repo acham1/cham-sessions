@@ -376,3 +376,12 @@ a {
 .site-footer a {
   color: #666;
 }
+
+.host-byline {
+  margin-top: 8px;
+  font-size: 12px;
+}
+
+.host-byline strong {
+  color: #555;
+}

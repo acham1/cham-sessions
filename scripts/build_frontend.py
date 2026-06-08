@@ -29,6 +29,10 @@ def main():
         "SITE_URL": config["site_url"],
         "API_URL": api_url,
         "PODCAST_URL": config["podcast_url"],
+        "HOST_NAME": config["host_name"],
+        "HOST_LINKEDIN": config["host_linkedin"],
+        "HOST_GITHUB": config["host_github"],
+        "HOST_EMAIL": config["host_email"],
     }
 
     if OUTPUT_DIR.exists():

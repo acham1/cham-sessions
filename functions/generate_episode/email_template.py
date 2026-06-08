@@ -83,6 +83,12 @@ def render_email(
 &nbsp;&middot;&nbsp;
 <a href="{unsub_url}" style="color:#666;">Unsubscribe</a>
 </p>
+<p style="margin:8px 0 0;color:#bbb;font-size:12px;text-align:center;">
+By {config["host_name"]} &middot;
+<a href="{config["host_linkedin"]}" style="color:#999;">LinkedIn</a> &middot;
+<a href="{config["host_github"]}" style="color:#999;">GitHub</a> &middot;
+<a href="mailto:{config["host_email"]}" style="color:#999;">{config["host_email"]}</a>
+</p>
 </td></tr>
 
 </table>

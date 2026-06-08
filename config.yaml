@@ -29,6 +29,7 @@ podcast_bucket: cham-sessions
 
 # Podcast metadata
 podcast_cover_url: https://storage.googleapis.com/cham-sessions/cover.png
+podcast_author: Alan Cham
 podcast_url: https://open.spotify.com/show/033uDz86df4iyGRU3LcB35
 podcast_category: Technology
 podcast_description: >-
@@ -36,6 +37,12 @@ podcast_description: >-
   AI turns it into a two- or three-voice conversation — Socratic walkthroughs,
   panels, and debates — that clearly cites its source. Built for self-education
   on long drives.
+
+# Host (public portfolio details — intentionally surfaced on the site, feed, and emails)
+host_name: Alan Cham
+host_linkedin: https://www.linkedin.com/in/acham1/
+host_github: https://github.com/acham1
+host_email: info@alanch.am
 
 # Generation guardrails
 # Per-episode ceiling for the research/script agent.

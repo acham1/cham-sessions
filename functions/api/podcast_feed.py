@@ -30,7 +30,7 @@ def build_podcast_rss_xml(episodes: list[dict]) -> str:
     SubElement(channel, "language").text = "en-us"
     SubElement(channel, "description").text = config["podcast_description"]
 
-    SubElement(channel, f"{{{ITUNES_NS}}}author").text = config["name"]
+    SubElement(channel, f"{{{ITUNES_NS}}}author").text = config["podcast_author"]
     SubElement(channel, f"{{{ITUNES_NS}}}summary").text = config["podcast_description"]
     SubElement(channel, f"{{{ITUNES_NS}}}explicit").text = "no"
 
@@ -38,7 +38,7 @@ def build_podcast_rss_xml(episodes: list[dict]) -> str:
     image.set("href", config["podcast_cover_url"])
 
     owner = SubElement(channel, f"{{{ITUNES_NS}}}owner")
-    SubElement(owner, f"{{{ITUNES_NS}}}name").text = config["name"]
+    SubElement(owner, f"{{{ITUNES_NS}}}name").text = config["podcast_author"]
     SubElement(owner, f"{{{ITUNES_NS}}}email").text = os.environ.get(
         "ADMIN_EMAIL", config["from_email"]
     )
@@ -53,7 +53,7 @@ def build_podcast_rss_xml(episodes: list[dict]) -> str:
 
         item = SubElement(channel, "item")
         SubElement(item, "title").text = ep.get("title", "Untitled")
-        SubElement(item, f"{{{ITUNES_NS}}}author").text = config["name"]
+        SubElement(item, f"{{{ITUNES_NS}}}author").text = config["podcast_author"]
         SubElement(item, f"{{{ITUNES_NS}}}explicit").text = "no"
 
         source = ep.get("source") or {}
