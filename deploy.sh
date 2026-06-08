@@ -28,6 +28,7 @@ gcloud functions deploy generate-episode \
     --trigger-topic="$TOPIC" \
     --timeout=540s \
     --memory=1Gi \
+    --max-instances=1 \
     --set-secrets="/etc/secrets/.env=$SECRET_NAME:latest" \
     --project="$PROJECT_ID"
 
@@ -51,6 +52,7 @@ gcloud functions deploy inbound \
     --allow-unauthenticated \
     --timeout=60s \
     --memory=512Mi \
+    --max-instances=5 \
     --set-secrets="/etc/secrets/.env=$SECRET_NAME:latest" \
     --project="$PROJECT_ID"
 
@@ -66,6 +68,7 @@ gcloud functions deploy api \
     --allow-unauthenticated \
     --timeout=60s \
     --memory=256Mi \
+    --max-instances=10 \
     --set-secrets="/etc/secrets/.env=$SECRET_NAME:latest" \
     --project="$PROJECT_ID"
 

@@ -1,5 +1,7 @@
 import os
 import re
+import time
+from collections import defaultdict
 from pathlib import Path
 
 import functions_framework
@@ -13,6 +15,7 @@ if _secrets_path.exists():
             key, _, value = line.partition("=")
             os.environ.setdefault(key.strip(), value.strip())
 
+from config import load_config
 from firestore_client import (
     add_subscriber,
     episodes_for_feed,
@@ -24,10 +27,42 @@ from welcome_email import send_welcome_email
 
 EMAIL_RE = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
 
+# --- Rate limiting on subscribe (per-instance, in-memory) ---
+_subscribe_attempts = defaultdict(list)
+_RATE_LIMIT = 3
+_RATE_WINDOW = 3600
+
+
+def _is_rate_limited(ip: str) -> bool:
+    now = time.time()
+    _subscribe_attempts[ip] = [
+        t for t in _subscribe_attempts[ip] if now - t < _RATE_WINDOW
+    ]
+    if len(_subscribe_attempts[ip]) >= _RATE_LIMIT:
+        return True
+    _subscribe_attempts[ip].append(now)
+    return False
+
+
+# --- Feed response cache (per-instance, TTL-based) — shields Firestore from
+# scrapers/refresh storms; new episodes appear within _CACHE_TTL seconds. ---
+_cache = {}
+_CACHE_TTL = 300
+
+
+def _cached(key: str, builder):
+    now = time.time()
+    if key in _cache and now - _cache[key][1] < _CACHE_TTL:
+        return _cache[key][0]
+    result = builder()
+    _cache[key] = (result, now)
+    return result
+
 
 def _cors_headers():
+    config = load_config()
     return {
-        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Origin": config["site_url"],
         "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
         "Access-Control-Allow-Headers": "Content-Type",
     }
@@ -63,6 +98,11 @@ def api(request):
 
 
 def _handle_subscribe(request):
+    ip = request.headers.get("X-Forwarded-For", request.remote_addr) or ""
+    ip = ip.split(",")[0].strip()
+    if _is_rate_limited(ip):
+        return _respond({"error": "too many requests, try again later"}, 429)
+
     data = request.get_json(silent=True)
     if not data or "email" not in data:
         return _respond({"error": "email required"}, 400)
@@ -104,7 +144,10 @@ def _handle_get_episode(episode_id):
 def _handle_feed():
     from feed import build_rss_xml
 
-    xml = build_rss_xml(episodes_for_feed(limit=50))
+    def _build():
+        return build_rss_xml(episodes_for_feed(limit=50))
+
+    xml = _cached("feed", _build)
     return Response(
         xml, content_type="application/rss+xml; charset=utf-8", headers=_cors_headers()
     )
@@ -113,7 +156,10 @@ def _handle_feed():
 def _handle_podcast_feed():
     from podcast_feed import build_podcast_rss_xml
 
-    xml = build_podcast_rss_xml(episodes_for_feed(limit=50))
+    def _build():
+        return build_podcast_rss_xml(episodes_for_feed(limit=50))
+
+    xml = _cached("podcast_feed", _build)
     return Response(
         xml, content_type="application/rss+xml; charset=utf-8", headers=_cors_headers()
     )
