@@ -18,6 +18,7 @@ if _secrets_path.exists():
 from config import load_config
 from firestore_client import (
     add_subscriber,
+    confirm_subscriber,
     episodes_for_feed,
     get_episode,
     list_episodes,
@@ -82,7 +83,9 @@ def api(request):
 
     if path == "/subscribe" and method == "POST":
         return _handle_subscribe(request)
-    elif path == "/unsubscribe" and method == "GET":
+    elif path == "/confirm" and method == "GET":
+        return _handle_confirm(request)
+    elif path == "/unsubscribe" and method in ("GET", "POST"):
         return _handle_unsubscribe(request)
     elif path == "/feed.xml" and method == "GET":
         return _handle_feed()
@@ -111,14 +114,30 @@ def _handle_subscribe(request):
     if not EMAIL_RE.match(email):
         return _respond({"error": "invalid email"}, 400)
 
-    status = add_subscriber(email)
-    if status == "subscribed":
-        send_welcome_email(email)
+    status, confirm_token = add_subscriber(email)
+    if status == "pending_confirmation":
+        from confirmation_email import send_confirmation_email
+
+        send_confirmation_email(email, confirm_token)
     return _respond({"status": status})
 
 
-def _handle_unsubscribe(request):
+def _handle_confirm(request):
     token = request.args.get("token", "")
+    if not token:
+        return _respond({"error": "token required"}, 400)
+
+    if confirm_subscriber(token):
+        return _respond({"status": "confirmed"})
+    return _respond({"error": "not found"}, 404)
+
+
+def _handle_unsubscribe(request):
+    # Accept POST too for RFC 8058 one-click List-Unsubscribe.
+    if request.method == "POST":
+        token = request.form.get("token", "") or request.args.get("token", "")
+    else:
+        token = request.args.get("token", "")
     if not token:
         return _respond({"error": "token required"}, 400)
 

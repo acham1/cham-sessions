@@ -31,7 +31,13 @@ def set_status(episode_id: str, status: str, error: str | None = None):
 
 
 def get_subscribers() -> list[dict]:
-    docs = _db().collection("subscribers").where("active", "==", True).stream()
+    docs = (
+        _db()
+        .collection("subscribers")
+        .where("active", "==", True)
+        .where("confirmed", "==", True)
+        .stream()
+    )
     return [doc.to_dict() for doc in docs]
 
 

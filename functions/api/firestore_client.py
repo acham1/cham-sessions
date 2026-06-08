@@ -10,29 +10,64 @@ def _db():
     return firestore.Client(project=os.environ.get("GCP_PROJECT"))
 
 
-def add_subscriber(email: str) -> str:
+def add_subscriber(email: str) -> tuple[str, str]:
+    """Add (or re-activate) a subscriber as UNCONFIRMED. Returns
+    (status, confirmation_token). Double opt-in: the subscriber must click the
+    confirmation link before they're emailed episodes."""
     db = _db()
     existing = list(
         db.collection("subscribers").where("email", "==", email).limit(1).stream()
     )
+    secret = os.environ["UNSUBSCRIBE_SECRET"]
+
     if existing:
         doc = existing[0]
-        if not doc.to_dict().get("active", True):
-            doc.reference.update({"active": True})
-            return "resubscribed"
-        return "already_subscribed"
+        data = doc.to_dict()
+        if data.get("confirmed") and data.get("active"):
+            return "already_subscribed", ""
+        if not data.get("active"):
+            confirm_token = hmac.new(
+                secret.encode(), f"confirm:{email}".encode(), hashlib.sha256
+            ).hexdigest()
+            doc.reference.update(
+                {
+                    "active": True,
+                    "confirmed": False,
+                    "confirmation_token": confirm_token,
+                }
+            )
+            return "pending_confirmation", confirm_token
+        return "pending_confirmation", data.get("confirmation_token", "")
 
-    secret = os.environ["UNSUBSCRIBE_SECRET"]
-    token = hmac.new(secret.encode(), email.encode(), hashlib.sha256).hexdigest()
+    unsub_token = hmac.new(secret.encode(), email.encode(), hashlib.sha256).hexdigest()
+    confirm_token = hmac.new(
+        secret.encode(), f"confirm:{email}".encode(), hashlib.sha256
+    ).hexdigest()
     db.collection("subscribers").add(
         {
             "email": email,
             "subscribed_at": datetime.now(timezone.utc),
-            "unsubscribe_token": token,
+            "unsubscribe_token": unsub_token,
+            "confirmation_token": confirm_token,
+            "confirmed": False,
             "active": True,
         }
     )
-    return "subscribed"
+    return "pending_confirmation", confirm_token
+
+
+def confirm_subscriber(token: str) -> bool:
+    db = _db()
+    docs = list(
+        db.collection("subscribers")
+        .where("confirmation_token", "==", token)
+        .limit(1)
+        .stream()
+    )
+    if not docs:
+        return False
+    docs[0].reference.update({"confirmed": True})
+    return True
 
 
 def remove_subscriber(token: str) -> bool:
