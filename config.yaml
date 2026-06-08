@@ -29,6 +29,7 @@ podcast_bucket: cham-sessions
 
 # Podcast metadata
 podcast_cover_url: https://storage.googleapis.com/cham-sessions/cover.png
+podcast_url: https://open.spotify.com/show/033uDz86df4iyGRU3LcB35
 podcast_category: Technology
 podcast_description: >-
   A personal listen-later feed. Forward an article, paper, PDF, or topic and an

@@ -28,6 +28,7 @@ def main():
         "DESCRIPTION": config["description"],
         "SITE_URL": config["site_url"],
         "API_URL": api_url,
+        "PODCAST_URL": config["podcast_url"],
     }
 
     if OUTPUT_DIR.exists():
