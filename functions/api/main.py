@@ -24,7 +24,6 @@ from firestore_client import (
     list_episodes,
     remove_subscriber,
 )
-from welcome_email import send_welcome_email
 
 EMAIL_RE = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
 

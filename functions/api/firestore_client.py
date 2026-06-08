@@ -119,11 +119,6 @@ def list_episodes(limit: int = 20, start_after: str | None = None) -> list[dict]
     return results
 
 
-def get_latest_episode() -> dict | None:
-    episodes = list_episodes(limit=1)
-    return episodes[0] if episodes else None
-
-
 def get_episode(episode_id: str) -> dict | None:
     doc = _db().collection("episodes").document(episode_id).get()
     if not doc.exists:
