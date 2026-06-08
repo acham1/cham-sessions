@@ -7,6 +7,7 @@ from google import genai
 from google.genai import types
 from google.cloud import storage
 from pydub import AudioSegment
+from pydub.silence import detect_leading_silence
 
 from config import load_config
 
@@ -56,9 +57,13 @@ BASE_STYLE = (
     "intent:"
 )
 
-# Gap inserted between consecutive turns. Shorter than a monologue's paragraph
-# break so the back-and-forth feels like a real conversation.
-TURN_GAP_MS = 350
+# Gap inserted between consecutive turns. Kept short so the back-and-forth feels
+# like a real conversation rather than a slow read.
+TURN_GAP_MS = 200
+
+# Threshold (dBFS) below which audio is treated as silence when trimming the
+# padding Gemini TTS adds to the start/end of each clip.
+SILENCE_THRESH_DBFS = -40
 
 
 def build_sections(episode: dict) -> list[dict]:
@@ -92,6 +97,15 @@ def _pcm_to_audio_segment(pcm_data: bytes) -> AudioSegment:
         wf.writeframes(pcm_data)
     buf.seek(0)
     return AudioSegment.from_wav(buf)
+
+
+def _trim_silence(seg: AudioSegment) -> AudioSegment:
+    """Strip leading/trailing silence padding from a TTS clip so turns butt up
+    cleanly against the (short) inter-turn gap."""
+    start = detect_leading_silence(seg, silence_threshold=SILENCE_THRESH_DBFS)
+    end = detect_leading_silence(seg.reverse(), silence_threshold=SILENCE_THRESH_DBFS)
+    trimmed = seg[start : len(seg) - end]
+    return trimmed if len(trimmed) > 0 else seg
 
 
 def synthesize_audio(sections: list[dict], episode_id: str, config: dict) -> dict:
@@ -155,18 +169,26 @@ def synthesize_audio(sections: list[dict], episode_id: str, config: dict) -> dic
     for segment in results:
         if segment is None:
             continue
+        segment = _trim_silence(segment)
         if len(combined) > 0:
             combined += gap
         combined += segment
 
+    # Pitch-preserved speedup via ffmpeg's atempo filter (applied on export).
+    speed = float(config.get("playback_speed", 1.0) or 1.0)
+    export_params = ["-filter:a", f"atempo={speed}"] if speed != 1.0 else None
+    final_secs = (len(combined) / 1000) / speed
+
     logger.info(
-        "TTS synthesized %d chars, total duration %.1fs",
+        "TTS synthesized %d chars, %.1fs raw -> %.1fs at %.2fx",
         total_chars,
         len(combined) / 1000,
+        final_secs,
+        speed,
     )
 
     mp3_buf = io.BytesIO()
-    combined.export(mp3_buf, format="mp3", bitrate="128k")
+    combined.export(mp3_buf, format="mp3", bitrate="128k", parameters=export_params)
     mp3_bytes = mp3_buf.getvalue()
 
     bucket_name = config["podcast_bucket"]
@@ -181,7 +203,7 @@ def synthesize_audio(sections: list[dict], episode_id: str, config: dict) -> dic
 
     return {
         "audio_url": audio_url,
-        "duration_secs": int(len(combined) / 1000),
+        "duration_secs": int(final_secs),
         "size_bytes": len(mp3_bytes),
         "model": TTS_MODEL,
         "skipped_sections": skipped,

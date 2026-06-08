@@ -38,5 +38,9 @@ podcast_description: >-
 
 # Generation guardrails
 # Per-episode ceiling for the research/script agent.
-max_budget_usd: 0.75
+max_budget_usd: 1.25
 claude_model: claude-sonnet-4-6
+
+# Audio pacing
+# Pitch-preserved playback speedup applied to the final mp3 (1.0 = no change).
+playback_speed: 1.15

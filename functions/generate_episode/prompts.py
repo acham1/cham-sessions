@@ -71,8 +71,13 @@ blocks, URLs, or file paths — describe what they do instead.
 - Vary turn length. Let speakers react like real people: surprise, doubt, \
 "wait, back up", agreement, a quick aside. These reactions make the tone prompts \
 land.
-- Aim for roughly 1500–3000 words of dialogue (about 12–22 minutes). Open with a \
-hook + the source citation, and close with a short wrap-up of the key takeaways.
+- Aim for roughly 2500–4000 words of dialogue. Open with a hook + the source \
+citation, and close with a short wrap-up of the key takeaways.
+- Go deep, not just broad. Don't merely summarize — develop the ideas: give \
+concrete examples and analogies, walk through how something actually works, \
+compare it to alternatives, surface trade-offs and counterpoints, and explain \
+why it matters in practice. Prefer substance over filler; every exchange should \
+teach something.
 
 # Per-turn tone
 Every turn carries a short "tone" describing how that line should be delivered \
